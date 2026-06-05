@@ -1,8 +1,15 @@
 #![no_std]
-use soroban_sdk::{contract, contractevent, contractimpl, Address, Env, token};
+use soroban_sdk::{contract, contractevent, contractimpl, contracttype, Address, Env, token, String};
 
 #[contract]
 pub struct Contract;
+
+#[contracttype]
+pub struct DonationData {
+    pub amount: i128,
+    pub username: String,
+    pub message: String,
+}
 
 #[contractevent(data_format = "single-value")]
 pub struct Donate {
@@ -10,7 +17,7 @@ pub struct Donate {
     from: Address,
     #[topic]
     to: Address,
-    amount: i128,
+    data: DonationData
 }
 
 #[contractimpl]
@@ -21,7 +28,9 @@ impl Contract {
         from: Address,
         to: Address,
         token_address: Address,
-        amount: i128,    
+        amount: i128,
+        username: String,
+        message: String    
     ) {
         from.require_auth();
         
@@ -38,7 +47,11 @@ impl Contract {
         Donate {
             from,
             to,
-            amount
+            data: DonationData {
+                amount,
+                username,
+                message
+            }
         }.publish(&env);
     }
 }
